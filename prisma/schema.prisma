@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Equipe {
+  id        Int                @id @default(autoincrement()) @map("cod_equipe")
+  nome      String?            @map("dsc_nome")
+  descricao String?            @map("dsc_descricao")
+  membros   EquipeComposicao[]
+
+  usrCriacao  Int?      @map("cod_usuario_criacao")
+  usrUpdate   Int?      @map("cod_usuario_update")
+  usrDelete   Int?      @map("cod_usuario_delete")
+  dataCriacao DateTime  @default(now()) @map("dat_criacao")
+  dataUpdate  DateTime  @updatedAt @map("dat_atualizacao")
+  dataDelete  DateTime? @map("dat_delete")
+
+  @@map("tp_equipe")
+}
+
+model EquipeComposicao {
+  id         Int     @id @default(autoincrement()) @map("cod_membro_equipe")
+  equipeId   Int     @map("cod_equipe")
+  pessoaId   Int     @map("cod_pessoa")
+  finalidade String? @map("dsc_finalidade")
+
+  usrCriacao  Int?      @map("cod_usuario_criacao")
+  usrUpdate   Int?      @map("cod_usuario_update")
+  usrDelete   Int?      @map("cod_usuario_delete")
+  dataCriacao DateTime  @default(now()) @map("dat_criacao")
+  dataUpdate  DateTime  @updatedAt @map("dat_atualizacao")
+  dataDelete  DateTime? @map("dat_delete")
+
+  equipe Equipe @relation(fields: [equipeId], references: [id])
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id])
+
+  @@map("tr_membro_equipe")
+}
+
+model Pessoa {
+  id        Int     @id @default(autoincrement()) @map("cod_pessoa")
+  pessoaRef Int     @map("cod_pessoa_ref")
+  nome      String  @map("dsc_nome_ref")
+  cpf       String  @unique @map("nr_cpf_ref")
+  status    Boolean @default(true) @map("dsc_status")
+
+  equipeComposicao EquipeComposicao[]
+
+  @@map("tref_pessoa")
+}
